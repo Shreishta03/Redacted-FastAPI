@@ -4,7 +4,6 @@ from app.core.pipeline import PIIPipeline
 
 router = APIRouter()
 
-# ✅ Instantiate ONCE at import time
 pipeline = PIIPipeline()
 
 @router.post("/redact", response_model=RedactResponse)
