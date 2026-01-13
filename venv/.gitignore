@@ -1,0 +1,22 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+
+# Env
+.env
+
+# Python cache
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# Virtual env
+venv/
+.env/
+.venv/
+
+# Model / HF cache
+.cache/
+.huggingface/
+models/
+uploads/
+outputs/
