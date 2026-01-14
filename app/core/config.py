@@ -104,3 +104,9 @@ PRESIDIO_OPERATORS = {
     "MEDICAL_RECORD_NUMBER": OperatorConfig("replace", {"new_value": "[MRN]"}),
     "DEFAULT": OperatorConfig("replace", {"new_value": "[REDACTED]"}),
 }
+
+#WebDev
+#Plain text length config
+MAX_PLAIN_TEXT_LENGTH = int(
+    os.getenv("MAX_PLAIN_TEXT_LENGTH", "5000")
+)
