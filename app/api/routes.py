@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request, UploadFile, File, Form
 from app.schemas.redact import RedactRequest, RedactResponse
 
 from fastapi import UploadFile, File, Form, Depends
@@ -12,24 +12,20 @@ from app.services.file_extractors.pdf_extractor import extract_text_from_pdf
 from app.services.file_extractors.docx_extractor import extract_text_from_docx
 from app.utils.helpers import redaction_helper
 
-# ✅ DB imports (ADDED)
 from app.db.models import RedactionLog
 from app.db.crud import get_db
 
 router = APIRouter()
 
-# -------------------------
 # Plain text redaction
-# -------------------------
 @router.post("/redact", response_model=RedactResponse)
 def redact_plain_text(
     request: RedactRequest,
-    db: Session = Depends(get_db)   # ✅ ADDED
+    db: Session = Depends(get_db) 
 ):
     try:
         result = redaction_helper(request.text)
 
-        # ✅ DB SAVE (ADDED)
         log = RedactionLog(
                 input_type="text",
                 source_name="plain_text",
@@ -48,23 +44,21 @@ def redact_plain_text(
         )
 
 
-# -------------------------
 # PDF redaction
-# -------------------------
 @router.post("/pdf", response_model=RedactResponse)
 async def redact_pdf_file(
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)   # ✅ ADDED
+    db: Session = Depends(get_db)  
 ):
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
 
     file_bytes = await file.read()
+
     try:
         text = extract_text_from_pdf(file_bytes)
         result = redaction_helper(text)
 
-        # ✅ DB SAVE (ADDED)
         log = RedactionLog(
             input_type="pdf",
             source_name=file.filename,
@@ -83,13 +77,11 @@ async def redact_pdf_file(
         )
 
 
-# -------------------------
 # DOCX redaction
-# -------------------------
 @router.post("/docx", response_model=RedactResponse)
 async def redact_docx_file(
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)   # ✅ ADDED
+    db: Session = Depends(get_db)  
 ):
     if not file.filename.endswith(".docx"):
         raise HTTPException(status_code=400, detail="Only DOCX files are supported")
@@ -99,7 +91,6 @@ async def redact_docx_file(
         text = extract_text_from_docx(file_bytes)
         result = redaction_helper(text)
 
-        # ✅ DB SAVE (ADDED)
         log = RedactionLog(
             input_type="docx",
             source_name=file.filename,
@@ -118,9 +109,8 @@ async def redact_docx_file(
         )
 
 
-# -------------------------
+
 # CSV column fetch
-# -------------------------
 @router.post("/csv/columns")
 async def get_csv_column_names(file: UploadFile = File(...)):
     if not file.filename.endswith(".csv"):
@@ -135,14 +125,13 @@ async def get_csv_column_names(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# -------------------------
 # CSV redaction
-# -------------------------
 @router.post("/redact/csv", response_model=RedactResponse)
 async def redact_csv_file(
+    request: Request,
     file: UploadFile = File(...),
     selected_columns: str = Form(...),
-    db: Session = Depends(get_db)   # ✅ ADDED
+    db: Session = Depends(get_db)   
 ):
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV files are supported")
@@ -158,7 +147,7 @@ async def redact_csv_file(
         text = extract_selected_columns_as_text(file_bytes, columns)
         result = redaction_helper(text)
 
-        # ✅ DB SAVE (ADDED)
+        #DB SAVE (ADDED)
         log = RedactionLog(
             input_type="csv",
             source_name=file.filename,

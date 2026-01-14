@@ -1,9 +1,6 @@
-from app.core import pipeline
 from app.schemas.redact import DetectedEntity, RedactResponse
 
-pipeline = pipeline.PIIPipeline()
-
-def redaction_helper(text: str) -> RedactResponse:
+def redaction_helper(text: str, pipeline) -> RedactResponse:
     redacted_text, entities = pipeline.run(text)
 
     api_entities = [
