@@ -12,8 +12,7 @@ from app.services.file_extractors.pdf_extractor import extract_text_from_pdf
 from app.services.file_extractors.docx_extractor import extract_text_from_docx
 from app.utils.helpers import redaction_helper
 
-from app.db.models import RedactionLog
-from app.db.crud import get_db
+from app.db.database import get_db
 from app.db.crud import create_redaction_log
 
 router = APIRouter()
