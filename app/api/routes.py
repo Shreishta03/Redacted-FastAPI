@@ -37,12 +37,6 @@ def redact_plain_text(
         pipeline = request.app.state.pii_pipeline
         result = redaction_helper(payload.text, pipeline)
 
-        log = RedactionLog(
-            input_type="text",
-            source_name="plain_text",
-            entity_count=len(result.entities),
-            columns_redacted=None)
-        result = redaction_helper(request.text)
         create_redaction_log(
         db=db,
         input_type="text",
@@ -170,14 +164,6 @@ async def redact_csv_file(
         pipeline = request.app.state.pii_pipeline
         result = redaction_helper(text, pipeline)
 
-        log = RedactionLog(
-            input_type="csv",
-            source_name=file.filename,
-            entity_count=len(result.entities),
-            columns_redacted=json.dumps(columns)
-        )
-        db.add(log)
-        db.commit()
         create_redaction_log(
         db=db,
         input_type="csv",
