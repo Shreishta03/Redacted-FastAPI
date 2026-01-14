@@ -29,3 +29,7 @@ outputs/
 
 # Logs
 *.log
+
+# Local scratch / notes
+model_main.py
+notes.txt
