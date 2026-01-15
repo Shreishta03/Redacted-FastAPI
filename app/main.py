@@ -5,6 +5,7 @@ from app.api.routes import router
 from app.core.pipeline import PIIPipeline
 from app.db.database import engine
 from app.db.models import Base
+from app.api.auth_routes import router as auth_router
 
 
 @asynccontextmanager
@@ -38,3 +39,5 @@ app.include_router(router, prefix="/api")
 @app.get("/")
 def health():
     return {"status": "ok"}
+
+app.include_router(auth_router, prefix="/api/auth")

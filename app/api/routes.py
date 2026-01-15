@@ -1,9 +1,8 @@
 from fastapi import APIRouter, HTTPException, Request, UploadFile, File, Form, Depends
 from sqlalchemy.orm import Session
 import json
-from app.core.config import MAX_PLAIN_TEXT_LENGTH, MAX_UPLOAD_SIZE_MB, MAX_UPLOAD_SIZE_BYTES
+from app.core.config import MAX_PLAIN_TEXT_LENGTH
 from app.schemas.redact import RedactRequest, RedactResponse
-from app.utils.file_size_validator import file_size_validator
 from app.utils.redaction_helper import redaction_helper
 
 from app.services.file_extractors.csv_extractor import (
@@ -65,8 +64,8 @@ async def redact_pdf_file(
 ):
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
+
     file_bytes = await file.read()
-    await file_size_validator(file_bytes)
 
     try:
         text = extract_text_from_pdf(file_bytes)
@@ -100,9 +99,8 @@ async def redact_docx_file(
 ):
     if not file.filename.endswith(".docx"):
         raise HTTPException(status_code=400, detail="Only DOCX files are supported")
-    file_bytes = await file.read()
-    await file_size_validator(file_bytes)
 
+    file_bytes = await file.read()
 
     try:
         text = extract_text_from_docx(file_bytes)
@@ -154,8 +152,8 @@ async def redact_csv_file(
 ):
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV files are supported")
+
     file_bytes = await file.read()
-    await file_size_validator(file_bytes)
 
     try:
         try:

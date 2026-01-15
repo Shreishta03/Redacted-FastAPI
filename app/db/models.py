@@ -1,6 +1,9 @@
-from sqlalchemy import Column, Integer, Text, DateTime
+from sqlalchemy import Column, Integer, Text, DateTime, String, Boolean
 from sqlalchemy.sql import func
 from .database import Base
+
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
 class RedactionLog(Base):
     __tablename__ = "redaction_logs"
@@ -10,4 +13,15 @@ class RedactionLog(Base):
     source_name = Column(Text, nullable=False)
     entity_count = Column(Integer)
     columns_redacted = Column(Text)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    is_logged_in = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
