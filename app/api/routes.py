@@ -17,6 +17,7 @@ from app.services.file_extractors.docx_extractor import extract_text_from_docx
 from app.db.database import get_db
 from app.db.models import RedactionLog
 from app.db.crud import create_redaction_log
+from app.auth.dependencies import get_current_user
 
 router = APIRouter()
 
@@ -25,6 +26,7 @@ router = APIRouter()
 def redact_plain_text(
     request: Request,
     payload: RedactRequest,
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     
@@ -39,6 +41,7 @@ def redact_plain_text(
 
         create_redaction_log(
         db=db,
+        user_id=current_user.id,
         input_type="text",
         source_name="plain_text",
         entity_count=len(result.entities)
@@ -56,6 +59,7 @@ def redact_plain_text(
 async def redact_pdf_file(
     request: Request,
     file: UploadFile = File(...),
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     if not file.filename.endswith(".pdf"):
@@ -70,6 +74,7 @@ async def redact_pdf_file(
 
         create_redaction_log(
         db=db,
+        user_id=current_user.id,
         input_type="pdf",
         source_name=file.filename,
         entity_count=len(result.entities)
@@ -87,6 +92,7 @@ async def redact_pdf_file(
 async def redact_docx_file(
     request: Request,
     file: UploadFile = File(...),
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     if not file.filename.endswith(".docx"):
@@ -102,6 +108,7 @@ async def redact_docx_file(
 
         create_redaction_log(
         db=db,
+        user_id=current_user.id,
         input_type="docx",
         source_name=file.filename,
         entity_count=len(result.entities)
@@ -135,6 +142,7 @@ async def redact_csv_file(
     request: Request,
     file: UploadFile = File(...),
     selected_columns: str = Form(...),
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     if not file.filename.endswith(".csv"):
@@ -154,6 +162,7 @@ async def redact_csv_file(
 
         create_redaction_log(
         db=db,
+        user_id=current_user.id,
         input_type="csv",
         source_name=file.filename,
         entity_count=len(result.entities),
