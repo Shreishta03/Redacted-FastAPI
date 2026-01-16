@@ -4,6 +4,7 @@ import json
 from app.core.config import MAX_PLAIN_TEXT_LENGTH
 from app.schemas.redact import RedactRequest, RedactResponse
 from app.utils.redaction_helper import redaction_helper
+from app.utils.file_size_validator import file_size_validator
 
 from app.services.file_extractors.csv_extractor import (
     get_csv_columns,
@@ -19,9 +20,7 @@ from app.db.crud import create_redaction_log
 
 router = APIRouter()
 
-# -----------------------------
 # Plain text redaction
-# -----------------------------
 @router.post("/redact", response_model=RedactResponse)
 def redact_plain_text(
     request: Request,
@@ -52,10 +51,7 @@ def redact_plain_text(
             detail=f"Redaction failed: {str(e)}"
         )
 
-
-# -----------------------------
 # PDF redaction
-# -----------------------------
 @router.post("/pdf", response_model=RedactResponse)
 async def redact_pdf_file(
     request: Request,
@@ -78,7 +74,6 @@ async def redact_pdf_file(
         source_name=file.filename,
         entity_count=len(result.entities)
     )
-
         return result
 
     except Exception as e:
@@ -87,10 +82,7 @@ async def redact_pdf_file(
             detail=f"PDF Redaction Failed: {str(e)}"
         )
 
-
-# -----------------------------
 # DOCX redaction
-# -----------------------------
 @router.post("/docx", response_model=RedactResponse)
 async def redact_docx_file(
     request: Request,
@@ -101,6 +93,7 @@ async def redact_docx_file(
         raise HTTPException(status_code=400, detail="Only DOCX files are supported")
 
     file_bytes = await file.read()
+    await file_size_validator(file_bytes)
 
     try:
         text = extract_text_from_docx(file_bytes)
@@ -113,7 +106,6 @@ async def redact_docx_file(
         source_name=file.filename,
         entity_count=len(result.entities)
     )
-
         return result
 
     except Exception as e:
@@ -122,15 +114,12 @@ async def redact_docx_file(
             detail=f"DOCX Redaction Failed: {str(e)}"
         )
 
-
-# -----------------------------
 # CSV column fetch
-# -----------------------------
 @router.post("/csv/columns")
 async def get_csv_column_names(file: UploadFile = File(...)):
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV files are supported")
-
+   
     file_bytes = await file.read()
 
     try:
@@ -140,9 +129,7 @@ async def get_csv_column_names(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# -----------------------------
 # CSV redaction
-# -----------------------------
 @router.post("/redact/csv", response_model=RedactResponse)
 async def redact_csv_file(
     request: Request,
@@ -172,7 +159,6 @@ async def redact_csv_file(
         entity_count=len(result.entities),
         columns_redacted=columns
     )
-
         return result
 
     except ValueError as ve:
