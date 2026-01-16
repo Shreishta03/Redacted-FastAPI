@@ -7,7 +7,6 @@ from app.db.database import engine
 from app.db.models import Base
 from app.api.auth_routes import router as auth_router
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Loading Pipeline..")

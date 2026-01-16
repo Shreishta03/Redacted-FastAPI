@@ -12,7 +12,6 @@ from app.auth.dependencies import get_current_user
 
 router = APIRouter(tags=["Authentication"])
 
-
 @router.post("/register", response_model=UserResponse)
 def register_user(
     user: UserCreate,
