@@ -8,6 +8,7 @@ from app.auth.password import hash_password
 
 def create_redaction_log(
     db: Session,
+    user_id: int,
     input_type: str,
     source_name: str,
     entity_count: int | None,
@@ -15,6 +16,7 @@ def create_redaction_log(
 ):
     log = RedactionLog(
         input_type=input_type,
+        user_id=user_id,
         source_name=source_name,
         entity_count=entity_count,
         columns_redacted=json.dumps(columns_redacted) if columns_redacted else None
@@ -26,14 +28,8 @@ def create_redaction_log(
 
     return log
 
-from sqlalchemy.orm import Session
-from app.db.models import User
-from app.auth.password import hash_password
-
-
 def get_user_by_email(db: Session, email: str):
     return db.query(User).filter(User.email == email).first()
-
 
 def create_user(db: Session, email: str, password: str):
     hashed_pwd = hash_password(password)
